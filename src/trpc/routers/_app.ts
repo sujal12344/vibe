@@ -1,33 +1,22 @@
 import { z } from "zod";
-import { baseProcedure, createTRPCRouter } from "../init";
+import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { inngest } from "@/inngest/client";
 export const appRouter = createTRPCRouter({
   invoke: baseProcedure
     .input(
       z.object({
-        email: z.string().optional(),
+        value: z.string(),
       })
     )
     .mutation(async ({ input }) => {
       await inngest.send({
-        name: "test/hello.world",
+        name: "test/event",
         data: {
-          email: input.email,
+          value: input.value,
         },
       });
-      return { success: `background job started with ${input.email}` };
-    }),
-  hello: baseProcedure
-    .input(
-      z.object({
-        text: z.string(),
-      })
-    )
-    .query((opts) => {
-      return {
-        greeting: `"hello" from server and "${opts.input.text}" from client`,
-      };
+      return { success: `background job started` };
     }),
 });
-// export type definition of API
+
 export type AppRouter = typeof appRouter;
