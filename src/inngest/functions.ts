@@ -24,10 +24,11 @@ export const codeAgentFunction = inngest.createFunction(
   { event: "code-agent/run" },
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
-      const sandbox = await Sandbox.create("vibe-nextjs-sujal-test-2");
+      const sandboxTemplate =
+        process.env.SANDBOX_TEMPLATE_NAME || "vibe-nextjs-sujal-test-2";
+      const sandbox = await Sandbox.create(sandboxTemplate);
       return sandbox.sandboxId;
     });
-
     const codeAgent = createAgent<AgentState>({
       name: "code-agent",
       description: "An expert coding agent",
@@ -79,8 +80,7 @@ export const codeAgentFunction = inngest.createFunction(
           }),
           handler: async (
             { files },
-            { step, network }
-            // : Tool.Options<AgentState>
+            { step, network }: Tool.Options<AgentState>
           ) => {
             const newFiles = await step?.run(
               "createOrUpdateFiles",
