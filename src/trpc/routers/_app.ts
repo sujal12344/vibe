@@ -1,22 +1,8 @@
-import { z } from "zod";
-import { baseProcedure, createTRPCRouter } from "@/trpc/init";
-import { inngest } from "@/inngest/client";
+import { messagesRouter } from "@/modules/messages/procedures";
+import { createTRPCRouter } from "@/trpc/init";
+
 export const appRouter = createTRPCRouter({
-  invoke: baseProcedure
-    .input(
-      z.object({
-        value: z.string(),
-      })
-    )
-    .mutation(async ({ input }) => {
-      await inngest.send({
-        name: "code-agent/run",
-        data: {
-          value: input.value,
-        },
-      });
-      return { success: `background job started` };
-    }),
+  messages: messagesRouter,
 });
 
 export type AppRouter = typeof appRouter;
