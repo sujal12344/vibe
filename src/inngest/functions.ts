@@ -13,6 +13,7 @@ import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 
 import { PROMPT } from "@/better-prompt";
+import { prisma } from "@/lib/prisma";
 
 interface AgentState {
   summary: string;
@@ -156,9 +157,9 @@ export const codeAgentFunction = inngest.createFunction(
 
     const result = await network.run(event.data.value);
 
-    // const isError =
-    //   !result.state.data.summary ||
-    //   Object.keys(result.state.data.files || {}).length === 0;
+    const isError =
+      !result.state.data.summary ||
+      Object.keys(result.state.data.files || {}).length === 0;
 
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
@@ -166,33 +167,33 @@ export const codeAgentFunction = inngest.createFunction(
       return `https://${host}`;
     });
 
-    // await step?.run("save-result", async () => {
-    //   if (isError) {
-    //     return await prisma.message.create({
-    //       data: {
-    //         projectId: event.data.projectId,
-    //         content: "Something went wrong. Please try again.",
-    //         role: "ASSISTANT",
-    //         type: "ERROR",
-    //       },
-    //     });
-    //   }
-    //   return await prisma.message.create({
-    //     data: {
-    //       projectId: event.data.projectId,
-    //       content: result.state.data.summary,
-    //       role: "ASSISTANT",
-    //       type: "RESULT",
-    //       fragment: {
-    //         create: {
-    //           sandboxUrl: sandboxUrl,
-    //           title: "Fragment",
-    //           files: result.state.data.files,
-    //         },
-    //       },
-    //     },
-    //   });
-    // });
+    await step?.run("save-result", async () => {
+      if (isError) {
+        return await prisma.message.create({
+          data: {
+            // projectId: event.data.projectId,
+            content: "Something went wrong. Please try again.",
+            role: "ASSISTANT",
+            type: "ERROR",
+          },
+        });
+      }
+      return await prisma.message.create({
+        data: {
+          // projectId: event.data.projectId,
+          content: result.state.data.summary,
+          role: "ASSISTANT",
+          type: "RESULT",
+          fragment: {
+            create: {
+              sandboxUrl: sandboxUrl,
+              title: "Fragment",
+              files: result.state.data.files,
+            },
+          },
+        },
+      });
+    });
 
     return {
       url: sandboxUrl,
