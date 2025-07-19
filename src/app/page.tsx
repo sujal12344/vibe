@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTRPC } from "@/trpc/client";
@@ -13,8 +14,8 @@ const Page = () => {
   const invoke = useMutation(
     trpc.invoke.mutationOptions({
       onSuccess: ({ success }) => {
-        toast.success(success), 
-        setValue("");
+        toast.success(success);
+        // setValue("");
       },
       onError: (error) => toast.error(error.message),
     })
