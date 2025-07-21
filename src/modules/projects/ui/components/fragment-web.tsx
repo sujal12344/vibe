@@ -1,4 +1,4 @@
-// import { Hint } from "@/components/hint";
+import { Hint } from "@/components/hint";
 import { Button } from "@/components/ui/button";
 import { Fragment } from "@prisma/client";
 import { ExternalLinkIcon, RefreshCcwIcon } from "lucide-react";
@@ -25,13 +25,13 @@ export function FragmentWeb({ data }: Props) {
   return (
     <div className="flex flex-col w-full h-full">
       <div className="p-2 border-b bg-sidebar flex items-center gap-x-2">
-        {/* <Hint text="Click to refresh" side="bottom" align="start">
+        <Hint text="Click to refresh" side="bottom" align="start">
           <Button size="sm" variant="outline" onClick={onRefresh}>
             <RefreshCcwIcon />
           </Button>
-        </Hint> */}
+        </Hint>
 
-        {/* <Hint text="Click to copy" side="bottom" align="center">
+        <Hint text="Click to copy" side="bottom" align="center">
           <Button
             size="sm"
             variant="outline"
@@ -41,9 +41,9 @@ export function FragmentWeb({ data }: Props) {
           >
             <span className="truncate">{data.sandboxUrl}</span>
           </Button>
-        </Hint> */}
+        </Hint>
 
-        {/* <Hint text="Open in a new tab" side="bottom" align="start">
+        <Hint text="Open in a new tab" side="bottom" align="start">
           <Button
             size="sm"
             disabled={!data.sandboxUrl}
@@ -55,7 +55,7 @@ export function FragmentWeb({ data }: Props) {
           >
             <ExternalLinkIcon />
           </Button>
-        </Hint> */}
+        </Hint>
       </div>
       <iframe
         key={fragmentKey}
