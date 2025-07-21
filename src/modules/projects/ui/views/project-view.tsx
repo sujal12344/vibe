@@ -15,8 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CodeIcon, CrownIcon, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-// import { FileExplorer } from "@/components/file-explorer";
-// import { UserControl } from "@/components/user-control";
+import { FileExplorer } from "@/components/file-explorer";
+import { UserControl } from "@/components/user-control";
 // import { useAuth } from "@clerk/nextjs";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -70,28 +70,28 @@ export const ProjectView = ({ projectId }: Props) => {
                   <CodeIcon /> <span>Code</span>
                 </TabsTrigger>
               </TabsList>
-              {/* <div className="ml-auto flex items-center gap-x-2">
-                {!hasProAccess && (
+              <div className="ml-auto flex items-center gap-x-2">
+                {/* {!hasProAccess && (
                   <Button asChild size="sm" variant="tertiary">
                     <Link href="/pricing">
                       <CrownIcon /> Upgrade
                     </Link>
                   </Button>
-                )}
+                )} */}
                 <UserControl />
-              </div> */}
+              </div>
             </div>
             <TabsContent value="preview">
               {!!activeFragment && <FragmentWeb data={activeFragment} />}
             </TabsContent>
 
-            {/* <TabsContent value="code" className="min-h-0">
+            <TabsContent value="code" className="min-h-0">
               {!!activeFragment?.files && (
                 <FileExplorer
                   files={activeFragment.files as { [path: string]: string }}
                 />
               )}
-            </TabsContent> */}
+            </TabsContent>
           </Tabs>
         </ResizablePanel>
       </ResizablePanelGroup>
