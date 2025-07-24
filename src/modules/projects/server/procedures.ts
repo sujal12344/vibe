@@ -6,7 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { prisma } from "@/lib/prisma";
 import z from "zod";
 
-export const projectRouter = createTRPCRouter({
+export const projectsRouter = createTRPCRouter({
   getOne: protectedProcedure
     .input(
       z.object({
