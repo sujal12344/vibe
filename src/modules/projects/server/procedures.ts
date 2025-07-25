@@ -1,18 +1,14 @@
 import { inngest } from "@/inngest/client";
-import { protectedProcedure, createTRPCRouter } from "@/trpc/init";
+import { prisma } from "@/lib/prisma";
+import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { z } from "zod";
 import { generateSlug } from "random-word-slugs";
 import { TRPCError } from "@trpc/server";
-// import { consumeCredits } from "@/lib/usage";
-import { prisma } from "@/lib/prisma";
-import z from "zod";
+import { consumeCredits } from "@/lib/usage";
 
 export const projectsRouter = createTRPCRouter({
   getOne: protectedProcedure
-    .input(
-      z.object({
-        id: z.string().min(1, { message: "Id is required" }),
-      })
-    )
+    .input(z.object({ id: z.string().min(1, { message: "Id is required" }) }))
     .query(async ({ input, ctx }) => {
       const existingProject = await prisma.project.findUnique({
         where: {
@@ -27,7 +23,6 @@ export const projectsRouter = createTRPCRouter({
           message: "Project not found",
         });
       }
-
       return existingProject;
     }),
   getMany: protectedProcedure.query(async ({ ctx }) => {
@@ -39,7 +34,6 @@ export const projectsRouter = createTRPCRouter({
         updatedAt: "desc",
       },
     });
-
     return projects;
   }),
   create: protectedProcedure
@@ -48,16 +42,17 @@ export const projectsRouter = createTRPCRouter({
         value: z
           .string()
           .min(1, { message: "Value is required" })
-          .max(1000, { message: "Value is too long" }),
+          .max(10000, { message: "Value is too long" }),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      // Note: Could be moved + extracted to reusable
       try {
-        // await consumeCredits();
+        await consumeCredits();
       } catch (error) {
         if (error instanceof Error) {
           throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
+            code: "BAD_REQUEST",
             message: "Something went wrong",
           });
         } else {
@@ -67,6 +62,7 @@ export const projectsRouter = createTRPCRouter({
           });
         }
       }
+
       const createdProject = await prisma.project.create({
         data: {
           userId: ctx.auth.userId,
@@ -84,7 +80,7 @@ export const projectsRouter = createTRPCRouter({
       });
 
       await inngest.send({
-        name: "code-agent/run",
+        name: "code-agent/run", // needs ot match in functions.ts!
         data: {
           value: input.value,
           projectId: createdProject.id,

@@ -1,12 +1,12 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import TextareaAutosize from "react-textarea-autosize";
 import { Form, FormField } from "@/components/ui/form";
-import z from "zod";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import z from "zod";
+import TextareaAutosize from "react-textarea-autosize";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
 import { useTRPC } from "@/trpc/client";
@@ -20,15 +20,14 @@ const formSchema = z.object({
   value: z
     .string()
     .min(1, { message: "Value is required" })
-    .max(1000, { message: "Value is too long" }),
+    .max(10000, { message: "Value is too long" }),
 });
 
 export const ProjectForm = () => {
   const router = useRouter();
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
   const clerk = useClerk();
-
+  const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,17 +39,18 @@ export const ProjectForm = () => {
     trpc.projects.create.mutationOptions({
       onSuccess: (data) => {
         queryClient.invalidateQueries(trpc.projects.getMany.queryOptions());
-        // queryClient.invalidateQueries(trpc.usage.status.queryOptions());
-        router.push(`/projects/${data.id}`);
+        router.push(`projects/${data.id}`);
+        queryClient.invalidateQueries(trpc.usage.status.queryOptions());
       },
       onError: (error) => {
+        toast.error(error.message);
+
         if (error.data?.code === "UNAUTHORIZED") {
-          toast.error("You must be signed in to create a project");
-          clerk.openSignIn();
-        } else if (error.data?.code === "TOO_MANY_REQUESTS") {
+          clerk.openSignIn(); // router.push alternative
+        }
+
+        if (error.data?.code === "TOO_MANY_REQUESTS") {
           router.push("/pricing");
-        } else {
-          toast.error(error.message);
         }
       },
     })
@@ -108,20 +108,17 @@ export const ProjectForm = () => {
           />
           <div className="flex gap-x-2 items-end justify-between pt-2">
             <div className="text-[10px] text-muted-foreground font-mono">
-              <kbd
-                className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1
-                        rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground"
-              >
+              <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
                 <span>&#8984;</span>Enter
               </kbd>
-              &nbsp;to submit
+              &nbsp; to submit
             </div>
             <Button
-              disabled={isButtonDisabled}
               className={cn(
                 "size-8 rounded-full",
                 isButtonDisabled && "bg-muted-foreground border"
               )}
+              disabled={isButtonDisabled}
             >
               {isPending ? (
                 <Loader2Icon className="size-4 animate-spin" />
@@ -135,7 +132,7 @@ export const ProjectForm = () => {
           {PROJECT_TEMPLATES.map((template) => (
             <Button
               key={template.title}
-              variant="outline"
+              variant={"outline"}
               size="sm"
               className="bg-white dark:bg-sidebar"
               onClick={() => onSelect(template.prompt)}
