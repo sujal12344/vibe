@@ -21,6 +21,7 @@ import {
 import { PROMPT } from "@/better-prompt";
 import { prisma } from "@/lib/prisma";
 import { FRAGMENT_TITLE_PROMPT, RESPONSE_PROMPT } from "@/prompt";
+import { SANDBOX_TIMEOUT } from "./constant";
 
 interface AgentState {
   summary: string;
@@ -35,6 +36,7 @@ export const codeAgentFunction = inngest.createFunction(
       const sandboxTemplate =
         process.env.SANDBOX_TEMPLATE_NAME || "vibe-nextjs-sujal-test-2";
       const sandbox = await Sandbox.create(sandboxTemplate);
+      await sandbox.setTimeout(SANDBOX_TIMEOUT);
       return sandbox.sandboxId;
     });
 
@@ -49,6 +51,7 @@ export const codeAgentFunction = inngest.createFunction(
           orderBy: {
             createdAt: "desc",
           },
+          take: 5,
         });
 
         for (const message of messages) {
@@ -58,7 +61,7 @@ export const codeAgentFunction = inngest.createFunction(
             content: message.content,
           });
         }
-        return formattedMessages;
+        return formattedMessages.reverse();
       }
     );
 
