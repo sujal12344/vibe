@@ -1,5 +1,6 @@
 import { Sandbox } from "@e2b/code-interpreter";
 import { AgentResult, type Message, TextMessage } from "@inngest/agent-kit";
+import { SANDBOX_TIMEOUT } from "./constant";
 
 export const getSandbox = async (sandboxId: string) => {
   if (!sandboxId || typeof sandboxId !== "string" || sandboxId.trim() === "") {
@@ -7,7 +8,9 @@ export const getSandbox = async (sandboxId: string) => {
   }
 
   try {
-    return await Sandbox.connect(sandboxId);
+    const sandbox = await Sandbox.connect(sandboxId);
+    await sandbox.setTimeout(SANDBOX_TIMEOUT);
+    return sandbox;
   } catch (error) {
     throw new Error(
       `Failed to connect to sandbox ${sandboxId}: ${
