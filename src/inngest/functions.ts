@@ -229,6 +229,8 @@ export const codeAgentFunction = inngest.createFunction(
       result.state.data.summary
     );
 
+    console.log(responseOutput, result, result.state.data, result.state.data.files)
+
     const isError =
       !result.state.data.summary ||
       Object.keys(result.state.data.files || {}).length === 0;

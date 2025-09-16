@@ -79,13 +79,22 @@ export const projectsRouter = createTRPCRouter({
         },
       });
 
-      await inngest.send({
-        name: "code-agent/run", // needs ot match in functions.ts!
-        data: {
-          value: input.value,
-          projectId: createdProject.id,
-        },
-      });
+      try {
+        console.log("Sending Inngest event for project:", createdProject.id);
+        const result = await inngest.send({
+          name: "code-agent/run", // needs ot match in functions.ts!
+          data: {
+            value: input.value,
+            projectId: createdProject.id,
+          },
+        });
+        console.log("Inngest event sent successfully:", result);
+      } catch (error) {
+        console.error("Failed to send Inngest event:", error);
+        console.error("Error details:", JSON.stringify(error, null, 2));
+        // Still return the project even if Inngest fails
+        // You might want to handle this differently based on your needs
+      }
 
       return createdProject;
     }),
