@@ -17,10 +17,12 @@ import {
   lastAssistantTextMessageContent,
   parseAgentOutput,
 } from "./utils";
+import { createTemplateCloner, createThemeApplier } from "./tools/template-cloner";
 
 import { PROMPT } from "@/better-prompt";
 import { prisma } from "@/lib/prisma";
 import { FRAGMENT_TITLE_PROMPT, RESPONSE_PROMPT } from "@/prompt";
+import { ENHANCED_SYSTEM_PROMPT, CATEGORY_SELECTION_PROMPT } from "@/prompts/enhanced-prompt";
 import { SANDBOX_TIMEOUT } from "./constant";
 
 interface AgentState {
@@ -34,7 +36,7 @@ export const codeAgentFunction = inngest.createFunction(
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandboxTemplate =
-        process.env.SANDBOX_TEMPLATE_NAME || "vibe-nextjs-sujal-test-2";
+        process.env.SANDBOX_TEMPLATE_NAME || "vibe-nextjs-sujal-4";
       const sandbox = await Sandbox.create(sandboxTemplate);
       await sandbox.setTimeout(SANDBOX_TIMEOUT);
       return sandbox.sandboxId;
@@ -77,15 +79,18 @@ export const codeAgentFunction = inngest.createFunction(
 
     const codeAgent = createAgent<AgentState>({
       name: "code-agent",
-      description: "An expert coding agent",
-      system: PROMPT,
+      description: "An expert coding agent with structured responses",
+      system: ENHANCED_SYSTEM_PROMPT,
       model: gemini({
         model: "gemini-2.0-flash",
       }),
       tools: [
+        // clone template based on user chosen category and sub-category
+        createTemplateCloner(sandboxId),
+        createThemeApplier(sandboxId),
         createTool({
           name: "terminal",
-          description: "Use the terminal",
+          description: "Use the terminal for running commands",
           parameters: z.object({
             command: z.string(),
           }),
@@ -229,7 +234,7 @@ export const codeAgentFunction = inngest.createFunction(
       result.state.data.summary
     );
 
-    console.log(responseOutput, result, result.state.data, result.state.data.files)
+    // console.log(responseOutput, result, result.state.data, result.state.data.files)
 
     const isError =
       !result.state.data.summary ||
@@ -242,16 +247,16 @@ export const codeAgentFunction = inngest.createFunction(
     });
 
     await step?.run("save-result", async () => {
-      if (isError) {
-        return await prisma.message.create({
-          data: {
-            projectId: event.data.projectId,
-            content: "Something went wrong. Please try again.",
-            role: "ASSISTANT",
-            type: "ERROR",
-          },
-        });
-      }
+      // if (isError) {
+      //   return await prisma.message.create({
+      //     data: {
+      //       projectId: event.data.projectId,
+      //       content: `Something went wrong. Please try again. length of msg ${Object.keys(result.state.data.files || {}).length} and summary ${result.state.data.summary}`,
+      //       role: "ASSISTANT",
+      //       type: "ERROR",
+      //     },
+      //   });
+      // }
       return await prisma.message.create({
         data: {
           projectId: event.data.projectId,

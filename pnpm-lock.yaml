@@ -134,6 +134,9 @@ importers:
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.1.1)
+      import-in-the-middle:
+        specifier: ^1.14.2
+        version: 1.14.2
       inngest:
         specifier: ^3.40.1
         version: 3.40.1(express@5.1.0)(next@15.4.2(@opentelemetry/api@1.9.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(typescript@5.9.2)
@@ -182,6 +185,9 @@ importers:
       recharts:
         specifier: 2.15.4
         version: 2.15.4(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      require-in-the-middle:
+        specifier: ^7.5.2
+        version: 7.5.2
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
@@ -202,7 +208,7 @@ importers:
         version: 3.25.76
     devDependencies:
       '@eslint/eslintrc':
-        specifier: ^3
+        specifier: latest
         version: 3.3.1
       '@tailwindcss/postcss':
         specifier: ^4
@@ -211,7 +217,7 @@ importers:
         specifier: ^20
         version: 20.19.10
       '@types/prismjs':
-        specifier: ^1.26.5
+        specifier: latest
         version: 1.26.5
       '@types/react':
         specifier: ^19
